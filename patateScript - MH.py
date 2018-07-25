@@ -4,11 +4,14 @@ from picamera import PiCamera
 from picamera.array import PiRGBArray
 from keras.models import load_model
 import numpy as np
+import keras.backend as K
+import h5py
 #####################################
 
 # Load Model:
-model = load_model('model-BigDataset_Race.h5')
-model_a = load_model('model-BigDataset-anticipation_Race.h5')
+model = load_model('model-MHRaceRich.h5')
+#model = load_model('model-MHRace.h5')
+#model_a = load_model('model-BigDataset-anticipation_Race.h5')
 print("Models Loaded")
 
 #init GPIO with BCM numberings
@@ -50,7 +53,7 @@ DIR.start(0)
 POW.ChangeDutyCycle(speed)
 
 last = 1
-preds_a = [1]
+#preds_a = [1]
 
 try:
 ##  # Capture frames
@@ -60,35 +63,31 @@ try:
     img = frame.array
     image = np.array([img[40:, :, :]])
 ##  # Model prediction
-    preds = model.predict(image)
-    preds = np.argmax(preds, axis=1)
+    preds_dir, preds_speed = model.predict(image)
+    preds_dir = np.argmax(preds_dir, axis=1)
+    preds_speed = np.argmax(preds_speed, axis=1)
 ##  # Filter
     #print(str(last))
-    if (last - preds)*(last - preds) == 4:
-        preds = 3
+    if (last - preds_dir)*(last - preds_dir) == 4:
+        preds_dir = 3
 ##  # Action
-    if preds == 0:
-        speed = SPEED_NORMAL
+    if preds_dir == 0:
         direction = 4
-    elif preds == 1:
-        image_a = np.array([img[40:58, :, :]])
-        preds_a = np.argmax(model_a.predict(image_a), axis=1)
-        if preds_a == 1:
-          speed = SPEED_FAST
-        else:
-          speed = SPEED_NORMAL
+    elif preds_dir == 1:
         direction = 7
-    elif preds == 2:
-        speed = SPEED_NORMAL
+    elif preds_dir == 2:
         direction = 10
-    elif preds == 3:
-        speed = SPEED_NORMAL
-        direction = 7
+    #elif preds_dir == 3:
+    #    direction = 7
+    if preds_speed == 0:
+      speed = SPEED_NORMAL
+    else:
+      speed = SPEED_FAST
     POW.ChangeDutyCycle(speed)
     DIR.ChangeDutyCycle(direction)
     #print(str(preds))
 ##  # Set memory
-    last = preds
+    last = preds_dir
 ##  # Clear the stream
     image = np.delete(image, 0)
     rawCapture.truncate(0)
