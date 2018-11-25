@@ -1,16 +1,104 @@
-# Patate
+# Patate42
 An autonomous RC car to compete the IronCar Challenge...
 
 ![](IMG_20180210_150832.jpg)
 
-At the beginning, the project was an RC car, recycled into, an... RC car, with more power, a camera, speech with Google Assistant, music player, Wifi extender...
-https://github.com/Klhnikov/PiRobot
+Patate42 won the first (and third) french IronCar race edition !!!
 
-The new robot uses Convolutional Neural Network to decide where to go (Left, Center or Right) from the camera's pictures and apply the CNN's decision to the engines for each video frame (128x160px - 60fps)
+## UPDATE !!
 
-The CNN have been trained with pictures we took from a free wheels replica we pushed by hand on several tracks, until we collected approx 1500 pictures.
+Patate42 won the IRONCAR Final 2018 !
 
-After training, the CNN hits at 89% accuracy on our validation tests and is able to ride severals laps.
+![](IMG_20181124_202851.jpg)
 
-UPDATE : Patate42 won the first french edition of IronCar race !!!
-We had to do a new dataset from scratch and modify the code a bit but it's still the same principle !
+[![Watch the video](IMG_20181124_202857.jpg)](https://drive.google.com/open?id=1keM8-AhfdoY7h9ngDyNgho8ZZcgjz46S)
+
+# Hardware Config :
+
+	* Tamyia TT-02 4WD RC car + larger wheels
+	* RaspberryPi 3B + battery pack (we use a Kuman)
+	* Rpi camera (depends on your taste, we use a wide angle fisheye)
+	* Adafruit PWM Hat
+	* Jumper cables, ...
+
+# Dataset :
+
+https://drive.google.com/drive/folders/1RkS-dGwbgnpD9yIdXqCuHKk6IJnPAIvv?usp=sharing
+
+# Installation :
+
+## on Raspberry :
+
+```
+git clone https://github.com/EParisot/Patate.git
+cd Patate
+pip install -r requirement.txt
+```
+
+To use a Xbox gamepad :
+```
+sudo apt-get install xboxdrv
+```
+
+## on Computer :
+
+```
+git clone https://github.com/EParisot/Patate.git
+cd Patate/Data_processing/Training
+pip install -r requirement.txt
+```
+
+# Usage :
+
+## Collect Data (manual drive + take images/labels) (RPi) :
+
+```
+cd Data_processing
+sudo python Auto_datamining_pad.py 0.1
+```
+to take one picture every 0.1 sec (to just control without taking pictures, don't specify any value)
+
+If you don't have Xbox Gamepad, you can use the computer keyboard
+(opencv needed, to install opencv on your RPi : https://www.pyimagesearch.com/2016/04/18/install-guide-raspberry-pi-3-raspbian-jessie-opencv-3/)
+
+```
+cd Data_processing
+python Auto_datamining_key.py 0.1
+```
+
+Or you can use the built-in car controler and labelise by hand later:
+(opencv needed)
+```
+cd Data_processing
+python Manual_datamining.py
+```
+
+## Data Augmentation / Balancing (computer):
+
+All pictures goes to Patate/Pics/Auto or Patate/Pics/Manual (create folder(s) if needed)
+
+Augmentation scrits can be found in Patate/Data_processing/Augmentation
+
+usages:
+
+```
+python 5to3.py [folder]		-> turn 2speeds/5directions labels into 2speeds/3directions
+python b_w.py [folder]		-> turn all pictures black and white
+python rename.py [folder]	-> rename pictures direction label with the folders name (ex: rename '0_4_4565432345.jpg' to '0_0_4565432345.jpg' in '/0' folder)
+python tags.py [folder]		-> retag discrete to categorical labels
+python reverse.py [folder]	-> apply a mirror effect on pics by value (comment/uncomment) and rename to opposite value (and add a 'r' in filename)
+```
+
+## Train model (Computer) :
+
+```
+cd Patate/Data_processing/Training
+jupyter notebook
+```
+
+## AutoPilot (RPi) :
+
+```
+cd Patate
+python patateScript5_threaded.py [myModel.h5]
+```

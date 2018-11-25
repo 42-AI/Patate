@@ -1,0 +1,12 @@
+SPEED_NORMAL = 320# top speed 314
+SPEED_FAST = 315#top speed 307
+DIR_L_M = 250
+DIR_L = 295
+DIR_C = 327
+DIR_R = 359
+DIR_R_M = 400
+
+H_UP = 150
+H_DOWN = 120
+
+IM_SIZE = (160, 96)
